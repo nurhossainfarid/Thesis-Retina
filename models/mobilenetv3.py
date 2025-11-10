@@ -11,8 +11,9 @@ class MobileNetV3(nn.Module):
         super(MobileNetV3, self).__init__()
 
         self.backbone = models.mobilenet_v3_large(pretrained=pretrained)
+        # remove the override OR
+        self.backbone.features[0][0] = nn.Conv2d(3, 16, kernel_size=3, stride=2, padding=1, bias=False)
 
-        self.backbone.features[0][0] = nn.Conv2d(1, 16, kernel_size=3, stride=2, padding=1, bias=False)
 
         num_features = self.backbone.classifier[0].in_features
 

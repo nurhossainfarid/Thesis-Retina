@@ -4,9 +4,7 @@ import torch.nn.functional as F
 
 from models.resnet_model import ResNet50
 from models.cnn_model import CustomCNN
-from models.hybridmodel import HybridViTCNNMLP
 from models.mobilenetv3 import MobileNetV3
-from models.hybridSwinDenseNetMLP import HybridSwinDenseNetMLP
 from models.DenseNet121 import DenseNet121Medical
 
 def get_model(model_name: str, num_classes: int, pretrained: bool = True, dropout_rate: float = 0.5):
@@ -15,12 +13,8 @@ def get_model(model_name: str, num_classes: int, pretrained: bool = True, dropou
         return ResNet50(num_classes=num_classes, pretrained=pretrained, dropout_rate=dropout_rate)
     elif model_name == 'customcnn':
         return CustomCNN(num_classes=num_classes)
-    elif model_name == 'hybridmodel':
-        return HybridViTCNNMLP(num_classes=num_classes, pretrained=pretrained, dropout_rate=dropout_rate)
     elif model_name == "mobilenetv3":
         return MobileNetV3(num_classes=num_classes, pretrained=pretrained, dropout_rate=dropout_rate)
-    elif model_name == "hybridswin":
-        return HybridSwinDenseNetMLP(num_classes=num_classes, pretrained=pretrained, dropout=dropout_rate)
     elif model_name == "densenet121":
         return DenseNet121Medical(num_classes=num_classes, pretrained=pretrained, dropout_rate=dropout_rate)
     else:

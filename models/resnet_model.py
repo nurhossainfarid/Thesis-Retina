@@ -12,7 +12,7 @@ class ResNet50(nn.Module):
         super(ResNet50, self).__init__()
         
         self.backbone = models.resnet50(pretrained=pretrained)
-        self.backbone.conv1 = nn.Conv2d(1, 64, kernel_size=3, stride=1, padding=3, bias=False)
+        self.backbone.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=3, bias=False)
         
         num_features = self.backbone.fc.in_features
         self.backbone.fc = nn.Identity()

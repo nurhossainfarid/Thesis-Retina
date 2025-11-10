@@ -125,7 +125,7 @@ def _deletion_curve_scores(model: nn.Module, x: torch.Tensor, heat: np.ndarray, 
         idxs = order[s * k:(s + 1) * k]
         for idx in idxs:
             y, z = idx // W, idx % W
-            x[0, 0, y, z] = 0.0
+            x[0, :, y, z] = 0.0
         with torch.no_grad():
             scores.append(model(x)[0, cls].item())
     return scores

@@ -120,7 +120,7 @@ class CTScanDataset(Dataset):
         """Load and preprocess medical CT scan image"""
         try:
             # Load image
-            image = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
             
             if image is None:
                 raise ValueError(f"Could not load image: {img_path}")
@@ -173,7 +173,8 @@ def get_medical_transforms(image_size: Tuple[int, int] = (224, 224),
             A.HorizontalFlip(p=0.5),
             A.Rotate(limit=10, p=0.5),
             A.ShiftScaleRotate(shift_limit=0.05, scale_limit=0.0, rotate_limit=0, p=0.5),
-            A.Normalize(mean=[0.5], std=[0.5]),
+            A.Normalize(mean=[0.485, 0.456, 0.406],
+            std=[0.229, 0.224, 0.225]),
             ToTensorV2()
         ])
 
@@ -321,7 +322,7 @@ def visualize_batch(data_loader: DataLoader, num_samples: int = 8):
 
 def get_class_weights(data_loader: DataLoader) -> torch.Tensor:
     """Calculate class weights from data loader"""
-    class_counts = torch.zeros(9)
+    class_counts = torch.zeros(3)
     total_samples = 0
     
     for _, labels in data_loader:
