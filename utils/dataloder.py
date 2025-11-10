@@ -321,7 +321,7 @@ def visualize_batch(data_loader: DataLoader, num_samples: int = 8):
 
 def get_class_weights(data_loader: DataLoader) -> torch.Tensor:
     """Calculate class weights from data loader"""
-    class_counts = torch.zeros(3)
+    class_counts = torch.zeros(9)
     total_samples = 0
     
     for _, labels in data_loader:

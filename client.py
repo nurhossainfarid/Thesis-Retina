@@ -150,7 +150,7 @@ class MedicalFLClient(fl.client.NumPyClient):
         data_dir: str,
         device: torch.device,
         model_name: str = "customcnn",
-        num_classes: int = 3,
+        num_classes: int = 9,
         batch_size: int = 16,
         local_epochs: int = 8,
         num_workers: int = 4,
@@ -415,7 +415,7 @@ class MedicalFLClient(fl.client.NumPyClient):
 
 
 def create_client(client_id: int, data_dir: str, model_name: str = "customcnn",
-                  batch_size: int = 16, local_epochs: int = 50, num_workers: int = 3) -> MedicalFLClient:
+                  batch_size: int = 16, local_epochs: int = 50, num_workers: int = 1) -> MedicalFLClient:
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     logger.info(f"Using device: {device}")
 
@@ -424,7 +424,7 @@ def create_client(client_id: int, data_dir: str, model_name: str = "customcnn",
         data_dir=data_dir,
         device=device,
         model_name=model_name,
-        num_classes=3,
+        num_classes=9,
         batch_size=batch_size,
         local_epochs=local_epochs,
         num_workers=num_workers,
