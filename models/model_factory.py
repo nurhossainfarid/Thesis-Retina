@@ -6,6 +6,7 @@ from models.resnet_model import ResNet50
 from models.cnn_model import CustomCNN
 from models.mobilenetv3 import MobileNetV3
 from models.DenseNet121 import DenseNet121Medical
+from models.hybridSwinDenseNetMLP import HybridSwinDenseNetMLP
 
 def get_model(model_name: str, num_classes: int, pretrained: bool = True, dropout_rate: float = 0.5):
     
@@ -17,6 +18,8 @@ def get_model(model_name: str, num_classes: int, pretrained: bool = True, dropou
         return MobileNetV3(num_classes=num_classes, pretrained=pretrained, dropout_rate=dropout_rate)
     elif model_name == "densenet121":
         return DenseNet121Medical(num_classes=num_classes, pretrained=pretrained, dropout_rate=dropout_rate)
+    elif model_name == "hybridswin":
+        return HybridSwinDenseNetMLP(num_classes=num_classes, pretrained=pretrained, dropout=dropout_rate)
     else:
         raise ValueError(f"Model {model_name} is not supported.")
 

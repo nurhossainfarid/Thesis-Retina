@@ -120,7 +120,13 @@ class CTScanDataset(Dataset):
         """Load and preprocess medical CT scan image"""
         try:
             # Load image
+            # was: image = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
+            image = cv2.imread(img_path, cv2.IMREAD_COLOR)
+            if image is None:
+                raise ValueError(f"Could not load image: {img_path}")
+            # BGR -> RGB
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
             
             if image is None:
                 raise ValueError(f"Could not load image: {img_path}")
@@ -136,22 +142,40 @@ class CTScanDataset(Dataset):
             return np.zeros((224, 224), dtype=np.uint8)
         
     def _apply_medical_preprocessing(self, image: np.ndarray) -> np.ndarray:
-        """Apply medical-specific preprocessing to CT scans"""
-        # Resize to standard size
+        """
+        Apply medical-specific preprocessing.
+        Supports both grayscale (H,W) and RGB (H,W,3).
+        - Resize to 224x224
+        - CLAHE on luminance (for RGB) or directly on grayscale
+        - Normalize to uint8 range for augmentations
+        """
+        # Resize
         image = cv2.resize(image, (224, 224), interpolation=cv2.INTER_CUBIC)
-        
-        # Apply CLAHE (Contrast Limited Adaptive Histogram Equalization)
+
+        # Ensure uint8/uint16 for CLAHE
+        if image.dtype not in (np.uint8, np.uint16):
+            # scale to 0-255 uint8
+            image = cv2.normalize(image, None, 0, 255, cv2.NORM_MINMAX)
+            image = image.astype(np.uint8)
+
         clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
-        image = clahe.apply(image)
-        
-        # Normalize to [0, 255] range
-        image = cv2.normalize(image, None, 0, 255, cv2.NORM_MINMAX)
-        
-        # Convert to float32 for albumentations
-        #image = image.astype(np.float32) / 255.0
-        image = image.astype(np.uint8)
-        
+
+        if image.ndim == 2:
+            # Grayscale path: CLAHE directly
+            image = clahe.apply(image)
+            # Expand to 3ch if your model expects RGB later
+            image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
+        else:
+            # RGB path: apply CLAHE on luminance channel (LAB space)
+            lab = cv2.cvtColor(image, cv2.COLOR_RGB2LAB)
+            l, a, b = cv2.split(lab)
+            l = clahe.apply(l)
+            lab = cv2.merge([l, a, b])
+            image = cv2.cvtColor(lab, cv2.COLOR_LAB2RGB)
+
+        # Keep as uint8 for Albumentations → will normalize later
         return image
+
     
 def get_medical_transforms(image_size: Tuple[int, int] = (224, 224), 
                           subset: str = 'train') -> A.Compose:
@@ -322,7 +346,7 @@ def visualize_batch(data_loader: DataLoader, num_samples: int = 8):
 
 def get_class_weights(data_loader: DataLoader) -> torch.Tensor:
     """Calculate class weights from data loader"""
-    class_counts = torch.zeros(3)
+    class_counts = torch.zeros(9)
     total_samples = 0
     
     for _, labels in data_loader:
