@@ -608,16 +608,16 @@ class MedicalFLStrategy(fl.server.strategy.FedAvg):
         THEMES = {
             "dark": {
                 "rc": {
-                    "figure.facecolor": "#0f1117",
-                    "axes.facecolor":   "#0f1117",
-                    "axes.edgecolor":   "#c7c9d1",
-                    "axes.labelcolor":  "#e6e6e6",
-                    "xtick.color":      "#c7c9d1",
-                    "ytick.color":      "#c7c9d1",
-                    "grid.color":       "#2a2f3a",
-                    "text.color":       "#e6e6e6",
-                    "legend.facecolor": "#131722",
-                    "legend.edgecolor": "#2a2f3a",
+                    "figure.facecolor": "white",
+                    "axes.facecolor":   "white",
+                    "axes.edgecolor":   "#222222",
+                    "axes.labelcolor":  "#222222",
+                    "xtick.color":      "#222222",
+                    "ytick.color":      "#222222",
+                    "grid.color":       "#CCCCCC",
+                    "text.color":       "#222222",
+                    "legend.facecolor": "white",
+                    "legend.edgecolor": "#DDDDDD",
                 },
                 # Okabe–Ito palette (color-blind friendly) + a couple extras
                 "colors": {
