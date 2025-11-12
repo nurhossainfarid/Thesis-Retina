@@ -415,7 +415,7 @@ class MedicalFLClient(fl.client.NumPyClient):
 
 
 def create_client(client_id: int, data_dir: str, model_name: str = "customcnn",
-                  batch_size: int = 16, local_epochs: int = 50, num_workers: int = 1) -> MedicalFLClient:
+                  batch_size: int = 32, local_epochs: int = 50, num_workers: int = 1) -> MedicalFLClient:
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     logger.info(f"Using device: {device}")
 
@@ -468,7 +468,7 @@ def main():
                         choices=["mobilenetv3", "hybridmodel", "resnet50", "customcnn", "hybridswin", "densenet121"],
                         help="Model architecture")
     parser.add_argument("--train-local", action="store_true", help="Run local training only (no FL server)")
-    parser.add_argument("--batch-size", type=int, default=16, help="Batch size (CPU-only: 32 for ResNet/DenseNet, 64 for small CNN/EfficientNetB0)")
+    parser.add_argument("--batch-size", type=int, default=32, help="Batch size (CPU-only: 32 for ResNet/DenseNet, 64 for small CNN/EfficientNetB0)")
     parser.add_argument("--local-epochs", type=int, default=50, help="Local epochs per round")
     parser.add_argument("--num-workers", type=int, default=0, help="DataLoader workers (set 0 if problems)")
     args = parser.parse_args()
