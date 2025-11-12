@@ -50,9 +50,9 @@ class EarlyStopping:
         
 class ModelMetrics: 
     """Class to compute and store model metrics"""
-    def __init__(self, num_classes: int = 3):
+    def __init__(self, num_classes: int = 4):
         self.num_classes = num_classes
-        self.class_names = ['Bengin cases', 'Malignant cases', 'Normal cases']
+        self.class_names = ['Cataract', 'Diabetic retinopathy', 'Glaucoma', 'Healthy']
 
     def calculate_metrics(self, y_true: np.ndarray, y_pred: np.ndarray, 
                       y_probs: Optional[np.ndarray] = None) -> Dict:

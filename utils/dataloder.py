@@ -324,7 +324,7 @@ def visualize_batch(data_loader: DataLoader, num_samples: int = 8):
     fig, axes = plt.subplots(2, 4, figsize=(16, 8))
     axes = axes.ravel()
     
-    class_names = ['Bengin cases', 'Malignant cases', 'Normal cases']
+    class_names = ['Cataract', 'Diabetic retinopathy', 'Glaucoma', 'Healthy']
     
     for i in range(min(num_samples, len(batch_images))):
         # Convert tensor to numpy and denormalize
@@ -346,7 +346,7 @@ def visualize_batch(data_loader: DataLoader, num_samples: int = 8):
 
 def get_class_weights(data_loader: DataLoader) -> torch.Tensor:
     """Calculate class weights from data loader"""
-    class_counts = torch.zeros(9)
+    class_counts = torch.zeros(4)
     total_samples = 0
     
     for _, labels in data_loader:
@@ -355,7 +355,7 @@ def get_class_weights(data_loader: DataLoader) -> torch.Tensor:
             total_samples += 1
     
     # Calculate weights
-    weights = total_samples / (3 * class_counts)
+    weights = total_samples / (4 * class_counts)
     return weights
 
 

@@ -13,7 +13,7 @@ MODEL_PATH  = r"Result/FLResult/HybridModel/last_global_model.pth"
 IMG_PATH    = r"predicted_outputs/Lung-CTScan_Copy/Malignant cases/Malignant_cases_22.jpg" 
 
 OUT_DIR     = "./xai_out"
-CLASS_NAMES = ["Benign", "Malignant", "Normal"]
+CLASS_NAMES = ['Cataract', 'Diabetic retinopathy', 'Glaucoma', 'Healthy']
 IMG_SIZE    = 224
 NORM_MEAN, NORM_STD = 0.5, 0.5          
 ALPHA = 0.35                          

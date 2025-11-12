@@ -8,7 +8,7 @@ class ResNet50(nn.Module):
     """
     ResNet50 model for more complex medical image analysis
     """
-    def __init__(self, num_classes: int = 3, pretrained: bool = True, dropout_rate: float = 0.5):
+    def __init__(self, num_classes: int = 4, pretrained: bool = True, dropout_rate: float = 0.5):
         super(ResNet50, self).__init__()
         
         self.backbone = models.resnet50(pretrained=pretrained)
