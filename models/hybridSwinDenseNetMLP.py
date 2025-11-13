@@ -11,7 +11,7 @@ class HybridSwinDenseNetMLP(nn.Module):
     """
     def __init__(
         self,
-        num_classes: int = 3,
+        num_classes: int = 4,
         pretrained: bool = True,
         swin_name: str = "swin_tiny_patch4_window7_224",
         dropout: float = 0.3,
@@ -28,7 +28,7 @@ class HybridSwinDenseNetMLP(nn.Module):
         # Convert first conv to 1-ch
         with torch.no_grad():
             w = self.densenet.features.conv0.weight  # [64, 3, 7, 7]
-            self.densenet.features.conv0 = nn.Conv2d(1, 64, kernel_size=7, stride=2, padding=3, bias=False)
+            self.densenet.features.conv0 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3, bias=False)
             self.densenet.features.conv0.weight.copy_(w.mean(dim=1, keepdim=True))
         dn_dim = self.densenet.classifier.in_features
         self.densenet.classifier = nn.Identity()  # features only
