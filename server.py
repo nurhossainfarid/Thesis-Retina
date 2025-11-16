@@ -40,7 +40,7 @@ def get_init_parameters(model_name: str, num_classes: int) -> fl.common.Paramete
         if models_dir not in sys.path:
             sys.path.insert(0, models_dir)
 
-        model = get_model(model_name, num_classes, pretrained=False)
+        model = get_model(model_name, num_classes, pretrained=True)
 
         with torch.no_grad():
             parameters = [v.cpu().numpy() for _, v in model.state_dict().items()]
@@ -516,251 +516,66 @@ class MedicalFLStrategy(fl.server.strategy.FedAvg):
         except Exception as e:
             logger.error(f"Failed to save final results: {e}", exc_info=True)
 
-    # def plot_training_curves(self, save_suffix: str = ""):
-        # if not self.history["round"]:
-        #     return
-        # rounds = self.history["round"]
-        # fig, axes = plt.subplots(2, 3, figsize=(18, 12))
-
-        # # Loss
-        # axes[0, 0].plot(rounds, self.history["train_loss"], label="Train Loss", linewidth=2, marker="o")
-        # axes[0, 0].plot(rounds, self.history["val_loss"], label="Val Loss", linewidth=2, marker="s")
-        # if self.history["test_loss"]:
-        #     # FIX: Slice the rounds to match the number of available test loss points
-        #     num_test_points = len(self.history["test_loss"])
-        #     axes[0, 0].plot(rounds[:num_test_points], self.history["test_loss"], label="Test Loss", linewidth=2, marker="^")
-        # axes[0, 0].set_title("Loss")
-
-        # # Acc
-        # axes[0, 1].plot(rounds, self.history["train_accuracy"], label="Train Acc", linewidth=2, marker="o")
-        # axes[0, 1].plot(rounds, self.history["val_accuracy"], label="Val Acc", linewidth=2, marker="s")
-        # if self.history["test_accuracy"]:
-        #     # FIX: Slice the rounds to match the number of available test accuracy points
-        #     num_test_points = len(self.history["test_accuracy"])
-        #     axes[0, 1].plot(rounds[:num_test_points], self.history["test_accuracy"], label="Test Acc", linewidth=2, marker="^")
-        # axes[0, 1].set_title("Accuracy")
-
-        # # F1
-        # axes[0, 2].plot(rounds, self.history["train_f1"], label="Train F1", linewidth=2, marker="o")
-        # axes[0, 2].plot(rounds, self.history["val_f1"], label="Val F1", linewidth=2, marker="s")
-        # if self.history["test_f1"]:
-        #     # FIX: Slice the rounds to match the number of available test F1 points
-        #     num_test_points = len(self.history["test_f1"])
-        #     axes[0, 2].plot(rounds[:num_test_points], self.history["test_f1"], label="Test F1", linewidth=2, marker="^")
-        # axes[0, 2].set_title("F1-Score")
-
-        # # Clients per round
-        # axes[1, 0].bar(rounds, self.history["num_clients"], alpha=0.8, label="Clients")
-        # axes[1, 0].set_title("Clients per Round")
-
-        # # Aggregation time
-        # if self.history["aggregation_time"]:
-        #     axes[1, 1].plot(rounds, self.history["aggregation_time"], linewidth=2, marker="d", label="Agg Time (s)")
-        #     axes[1, 1].set_title("Aggregation Time (s)")
-
-        # # Data distribution (latest round)
-        # if self.history["client_data_sizes"]:
-        #     latest = self.history["client_data_sizes"][-1]
-        #     labels = [f"C{i+1}" for i in range(len(latest))]
-        #     axes[1, 2].pie(latest, labels=labels, autopct="%1.1f%%", startangle=90)
-        #     axes[1, 2].set_title("Data Distribution (latest)")
-
-        # for ax in axes.ravel():
-        #     ax.grid(True, alpha=0.3)
-        #     handles, labels = ax.get_legend_handles_labels()
-        #     if handles:
-        #         ax.legend(loc="best")
-
-        # plt.tight_layout()
-        # out = os.path.join(self.results_base_dir, f"training_curves{save_suffix}.png")
-        # plt.savefig(out, dpi=300, bbox_inches="tight")
-        # plt.close()
-        # logger.info(f"Saved plot → {out}")
-
-    def plot_training_curves(self, save_suffix: str = "", theme: str = "dark", custom_colors: dict | None = None):
-        """
-        Save two figures with a themed color palette.
-
-        Parameters
-        ----------
-        save_suffix : str
-            Suffix for output filenames.
-        theme : {"dark","light"}
-            Selects rcParam bundle + default color palette.
-        custom_colors : dict | None
-            Optional overrides, e.g. {
-                "train": "#4C78A8",
-                "val":   "#F58518",
-                "test":  "#54A24B",
-                "agg":   "#B279A2",
-                "bar":   "#4C78A8",
-                "pie":   ["#4C78A8","#F58518","#54A24B","#E45756","#72B7B2","#EECA3B"]
-            }
-        """
-        import os
-        import matplotlib.pyplot as plt
-        from matplotlib import rc_context
-
-        if not self.history.get("round") or not self.history["round"]:
+    def plot_training_curves(self, save_suffix: str = ""):
+        if not self.history["round"]:
             return
+        rounds = self.history["round"]
+        fig, axes = plt.subplots(2, 3, figsize=(18, 12))
 
-        # ---------- THEMES ----------
-        THEMES = {
-            "dark": {
-                "rc": {
-                    "figure.facecolor": "white",
-                    "axes.facecolor":   "white",
-                    "axes.edgecolor":   "#222222",
-                    "axes.labelcolor":  "#222222",
-                    "xtick.color":      "#222222",
-                    "ytick.color":      "#222222",
-                    "grid.color":       "#CCCCCC",
-                    "text.color":       "#222222",
-                    "legend.facecolor": "white",
-                    "legend.edgecolor": "#DDDDDD",
-                },
-                # Okabe–Ito palette (color-blind friendly) + a couple extras
-                "colors": {
-                    "train": "#56B4E9",  # sky blue
-                    "val":   "#E69F00",  # orange
-                    "test":  "#009E73",  # bluish green
-                    "agg":   "#CC79A7",  # reddish purple
-                    "bar":   "#56B4E9",
-                    "pie":   ["#56B4E9","#E69F00","#009E73","#F0E442","#0072B2","#D55E00","#CC79A7"]
-                }
-            },
-            "light": {
-                "rc": {
-                    "figure.facecolor": "white",
-                    "axes.facecolor":   "white",
-                    "axes.edgecolor":   "#222222",
-                    "axes.labelcolor":  "#222222",
-                    "xtick.color":      "#222222",
-                    "ytick.color":      "#222222",
-                    "grid.color":       "#CCCCCC",
-                    "text.color":       "#222222",
-                    "legend.facecolor": "white",
-                    "legend.edgecolor": "#DDDDDD",
-                },
-                "colors": {
-                    "train": "#1f77b4",  # blue
-                    "val":   "#ff7f0e",  # orange
-                    "test":  "#2ca02c",  # green
-                    "agg":   "#9467bd",  # purple
-                    "bar":   "#1f77b4",
-                    "pie":   ["#1f77b4","#ff7f0e","#2ca02c","#d62728","#17becf","#bcbd22","#9467bd"]
-                }
-            }
-        }
+        # Loss
+        axes[0, 0].plot(rounds, self.history["train_loss"], label="Train Loss", linewidth=2, marker="o")
+        axes[0, 0].plot(rounds, self.history["val_loss"], label="Val Loss", linewidth=2, marker="s")
+        if self.history["test_loss"]:
+            # FIX: Slice the rounds to match the number of available test loss points
+            num_test_points = len(self.history["test_loss"])
+            axes[0, 0].plot(rounds[:num_test_points], self.history["test_loss"], label="Test Loss", linewidth=2, marker="^")
+        axes[0, 0].set_title("Loss")
 
-        # Select theme & merge custom overrides
-        theme = theme if theme in THEMES else "dark"
-        rc_bundle = THEMES[theme]["rc"].copy()
-        color_bundle = THEMES[theme]["colors"].copy()
+        # Acc
+        axes[0, 1].plot(rounds, self.history["train_accuracy"], label="Train Acc", linewidth=2, marker="o")
+        axes[0, 1].plot(rounds, self.history["val_accuracy"], label="Val Acc", linewidth=2, marker="s")
+        if self.history["test_accuracy"]:
+            # FIX: Slice the rounds to match the number of available test accuracy points
+            num_test_points = len(self.history["test_accuracy"])
+            axes[0, 1].plot(rounds[:num_test_points], self.history["test_accuracy"], label="Test Acc", linewidth=2, marker="^")
+        axes[0, 1].set_title("Accuracy")
 
-        if custom_colors:
-            for k, v in custom_colors.items():
-                if k == "pie" and isinstance(v, (list, tuple)):
-                    color_bundle["pie"] = list(v)
-                else:
-                    color_bundle[k] = v
+        # F1
+        axes[0, 2].plot(rounds, self.history["train_f1"], label="Train F1", linewidth=2, marker="o")
+        axes[0, 2].plot(rounds, self.history["val_f1"], label="Val F1", linewidth=2, marker="s")
+        if self.history["test_f1"]:
+            # FIX: Slice the rounds to match the number of available test F1 points
+            num_test_points = len(self.history["test_f1"])
+            axes[0, 2].plot(rounds[:num_test_points], self.history["test_f1"], label="Test F1", linewidth=2, marker="^")
+        axes[0, 2].set_title("F1-Score")
 
-        rounds = list(self.history["round"])
+        # Clients per round
+        axes[1, 0].bar(rounds, self.history["num_clients"], alpha=0.8, label="Clients")
+        axes[1, 0].set_title("Clients per Round")
 
-        def _plot_pair(ax, x, y_train, y_val, y_test, title, yl=None):
-            if y_train:
-                ax.plot(x[:len(y_train)], y_train, label="Train", linewidth=2, marker="o", color=color_bundle["train"])
-            if y_val:
-                ax.plot(x[:len(y_val)], y_val, label="Val", linewidth=2, marker="s", color=color_bundle["val"])
-            if y_test:
-                ax.plot(x[:len(y_test)], y_test, label="Test", linewidth=2, marker="^", color=color_bundle["test"])
-            ax.set_title(title)
-            if yl: ax.set_ylabel(yl)
-            ax.grid(True, alpha=0.35)
-            h, _ = ax.get_legend_handles_labels()
-            if h: ax.legend(loc="best")
+        # Aggregation time
+        if self.history["aggregation_time"]:
+            axes[1, 1].plot(rounds, self.history["aggregation_time"], linewidth=2, marker="d", label="Agg Time (s)")
+            axes[1, 1].set_title("Aggregation Time (s)")
 
-        with rc_context(rc=rc_bundle):
-            # ---------- Figure 1: Core metrics ----------
-            fig1, axes1 = plt.subplots(2, 2, figsize=(14, 10))
+        # Data distribution (latest round)
+        if self.history["client_data_sizes"]:
+            latest = self.history["client_data_sizes"][-1]
+            labels = [f"C{i+1}" for i in range(len(latest))]
+            axes[1, 2].pie(latest, labels=labels, autopct="%1.1f%%", startangle=90)
+            axes[1, 2].set_title("Data Distribution (latest)")
 
-            _plot_pair(
-                axes1[0, 0],
-                rounds,
-                self.history.get("train_loss", []),
-                self.history.get("val_loss", []),
-                self.history.get("test_loss", []),
-                "Loss", yl="Loss"
-            )
+        for ax in axes.ravel():
+            ax.grid(True, alpha=0.3)
+            handles, labels = ax.get_legend_handles_labels()
+            if handles:
+                ax.legend(loc="best")
 
-            _plot_pair(
-                axes1[0, 1],
-                rounds,
-                self.history.get("train_accuracy", []),
-                self.history.get("val_accuracy", []),
-                self.history.get("test_accuracy", []),
-                "Accuracy", yl="Accuracy"
-            )
-
-            _plot_pair(
-                axes1[1, 0],
-                rounds,
-                self.history.get("train_f1", []),
-                self.history.get("val_f1", []),
-                self.history.get("test_f1", []),
-                "F1-Score", yl="F1"
-            )
-
-            ax_ag = axes1[1, 1]
-            agg_time = self.history.get("aggregation_time", [])
-            if agg_time:
-                ax_ag.plot(rounds[:len(agg_time)], agg_time, linewidth=2, marker="d",
-                        label="Agg Time (s)", color=color_bundle["agg"])
-            ax_ag.set_title("Aggregation Time (s)")
-            ax_ag.set_ylabel("Seconds")
-            ax_ag.grid(True, alpha=0.35)
-            h, _ = ax_ag.get_legend_handles_labels()
-            if h: ax_ag.legend(loc="best")
-
-            plt.tight_layout()
-            out1 = os.path.join(self.results_base_dir, f"training_core_metrics{save_suffix}.png")
-            plt.savefig(out1, dpi=300, bbox_inches="tight")
-            plt.close(fig1)
-
-            # ---------- Figure 2: Rounds & Distribution ----------
-            fig2, axes2 = plt.subplots(1, 2, figsize=(14, 6))
-
-            # Clients per round (bar)
-            num_clients = self.history.get("num_clients", [])
-            ax_bar = axes2[0]
-            if num_clients:
-                ax_bar.bar(rounds[:len(num_clients)], num_clients, alpha=0.9, label="Clients", color=color_bundle["bar"])
-            ax_bar.set_title("Clients per Round")
-            ax_bar.set_xlabel("Round")
-            ax_bar.set_ylabel("Clients")
-            ax_bar.grid(True, axis="y", alpha=0.3)
-            h, _ = ax_bar.get_legend_handles_labels()
-            if h: ax_bar.legend(loc="best")
-
-            # Latest data distribution (pie)
-            ax_pie = axes2[1]
-            client_sizes_hist = self.history.get("client_data_sizes", [])
-            if client_sizes_hist and client_sizes_hist[-1]:
-                latest = client_sizes_hist[-1]
-                total = sum(latest) if latest else 0
-                if total > 0:
-                    labels = [f"C{i+1}" for i in range(len(latest))]
-                    pie_colors = (color_bundle.get("pie") or [None])[:len(latest)]
-                    ax_pie.pie(latest, labels=labels, autopct="%1.1f%%", startangle=90, colors=pie_colors)
-                    ax_pie.set_aspect("equal")
-            ax_pie.set_title("Data Distribution (latest)")
-
-            plt.tight_layout()
-            out2 = os.path.join(self.results_base_dir, f"rounds_and_distribution{save_suffix}.png")
-            plt.savefig(out2, dpi=300, bbox_inches="tight")
-            plt.close(fig2)
-
-        logger.info(f"Saved plots → {out1} and {out2}")
+        plt.tight_layout()
+        out = os.path.join(self.results_base_dir, f"training_curves{save_suffix}.png")
+        plt.savefig(out, dpi=300, bbox_inches="tight")
+        plt.close()
+        logger.info(f"Saved plot → {out}")
 
 
 class LoggingClientManager(SimpleClientManager):
@@ -838,7 +653,7 @@ def main():
     parser.add_argument("--fraction-fit", type=float, default=1.0, help="Fraction of clients to train each round")
     parser.add_argument("--fraction-evaluate", type=float, default=1.0, help="Fraction of clients to evaluate each round")
     parser.add_argument("--model", type=str, default="customcnn",
-                        choices=["mobilenetv3", "hybridmodel", "resnet50", "customcnn", "hybridswin", "densenet121", "efficientnetb3rca"])
+                        choices=["mobilenetv3", "hybridmodel", "resnet50", "customcnn", "hybridswin", "densenet121"])
     parser.add_argument("--num-classes", type=int, default=4)
     parser.add_argument("--local-epochs", type=int, default=6, help="Local epochs per round")
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")

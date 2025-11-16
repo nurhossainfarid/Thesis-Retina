@@ -52,7 +52,7 @@ class ModelMetrics:
     """Class to compute and store model metrics"""
     def __init__(self, num_classes: int = 4):
         self.num_classes = num_classes
-        self.class_names = ['Cataract', 'Diabetic retinopathy', 'Glaucoma', 'Healthy']
+        self.class_names = ['Cataract', 'diabetic_retinopathy', 'glaucoma', 'normal']
 
     def calculate_metrics(self, y_true: np.ndarray, y_pred: np.ndarray, 
                       y_probs: Optional[np.ndarray] = None) -> Dict:

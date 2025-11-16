@@ -324,7 +324,7 @@ def visualize_batch(data_loader: DataLoader, num_samples: int = 8):
     fig, axes = plt.subplots(2, 4, figsize=(16, 8))
     axes = axes.ravel()
     
-    class_names = ['Cataract', 'Diabetic retinopathy', 'Glaucoma', 'Healthy']
+    class_names = ['Cataract', 'diabetic_retinopathy', 'glaucoma', 'normal']
     
     for i in range(min(num_samples, len(batch_images))):
         # Convert tensor to numpy and denormalize
