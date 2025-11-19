@@ -17,6 +17,9 @@ def get_model(model_name: str, num_classes: int, pretrained: bool = True, dropou
         return CustomCNN(num_classes=num_classes)
     elif model_name == "mobilenetv3":
         return MobileNetV3(num_classes=num_classes, pretrained=pretrained, dropout_rate=dropout_rate)
+    elif model_name == "shufflenetv2":
+        from models.ShuffleNetV2 import ShuffleNetV2
+        return ShuffleNetV2(num_classes=num_classes, pretrained=pretrained, dropout_rate=dropout_rate)
     elif model_name == "densenet121":
         return DenseNet121Medical(num_classes=num_classes, pretrained=pretrained, dropout_rate=dropout_rate)
     elif model_name == "hybridswin":

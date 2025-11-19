@@ -436,7 +436,7 @@ class MedicalFLStrategy(fl.server.strategy.FedAvg):
             if models_dir not in sys.path:
                 sys.path.insert(0, models_dir)
 
-            model = get_model(self.model_name, num_classes=self.num_classes, pretrained=False)
+            model = get_model(self.model_name, num_classes=self.num_classes, pretrained=True)
 
             best_state_dict = OrderedDict()
             for (name, param), arr in zip(
@@ -653,7 +653,7 @@ def main():
     parser.add_argument("--fraction-fit", type=float, default=1.0, help="Fraction of clients to train each round")
     parser.add_argument("--fraction-evaluate", type=float, default=1.0, help="Fraction of clients to evaluate each round")
     parser.add_argument("--model", type=str, default="customcnn",
-                        choices=["mobilenetv3", "hybridmodel", "resnet50", "customcnn", "hybridswin", "densenet121"])
+                        choices=["mobilenetv3", "hybridmodel","", "resnet50", "customcnn", "hybridswin", "densenet121", "efficientnetb3rca"])
     parser.add_argument("--num-classes", type=int, default=4)
     parser.add_argument("--local-epochs", type=int, default=6, help="Local epochs per round")
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
